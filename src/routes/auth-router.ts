@@ -30,8 +30,6 @@ router.post('/login', async (req, res, next) => {
             return;
         }
         const passIsValid = await bcrypt.compare(credentials.password, user.password);
-        console.log(credentials.password);
-        console.log(user.password);
         if (!passIsValid) {
             next(new AppError(401, `Username or password is incorrect.`));
             return;

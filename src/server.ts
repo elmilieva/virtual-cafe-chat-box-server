@@ -17,6 +17,7 @@ import { UserRepository } from './dao/mongo-repository';
 import { User } from './model/user.model';
 import usersRouter from './routes/users-router';
 import authRouter from './routes/auth-router';
+import roomsRouter from './routes/rooms-router';
 
 const POSTS_FILE = path.join(__dirname, '../posts.json');
 const DB_URL = 'mongodb://localhost:27017/';
@@ -27,11 +28,14 @@ let connection: MongoClient;
 
 async function start() {
   const app = express();
+  const http = require('http').Server(app);
+  const io = require('socket.io')(http, { transports: ['websocket', 'polling'] });  
 
   const db = await initDb(DB_URL, DB_NAME);
   const userRepo = new UserRepository(User, db, 'users');
 
   app.locals.userRepo = userRepo;
+  app.locals.io = io;
 
   app.set('port', PORT);
 
@@ -54,6 +58,7 @@ async function start() {
   // attach feature routers
   app.use('/api/users', usersRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/rooms', roomsRouter);
 
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) {
