@@ -3,6 +3,7 @@ import { MongoClient, Db, ObjectID } from 'mongodb';
 import { Repository } from './repository';
 import { AppError } from '../model/errors';
 import { User } from '../model/user.model';
+import { Product } from '../model/product.model';
 
 
 export class MongoRepository<T extends Indentifiable> implements Repository<T> {
@@ -72,6 +73,16 @@ export class UserRepository extends MongoRepository<User> {
             return await this.db.collection(this.collection).findOne({'username': username});
         } catch(err) {
             throw new AppError(404, `User with username: "${username}" does not exist.`);
+        }
+    }
+}
+
+export class ProductRepository extends MongoRepository<Product> {
+    async findByName(name: string): Promise<Product> {
+        try {
+            return await this.db.collection(this.collection).findOne({'name': name});
+        } catch(err) {
+            throw new AppError(404, `Product with name: "${name}" does not exist.`);
         }
     }
 }

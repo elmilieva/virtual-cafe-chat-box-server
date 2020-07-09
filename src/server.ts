@@ -18,8 +18,11 @@ import { User } from './model/user.model';
 import usersRouter from './routes/users-router';
 import authRouter from './routes/auth-router';
 import roomsRouter from './routes/rooms-router';
+import productsRouter from './routes/products-router';
 import { createServer } from 'http';
 import * as socketIo from 'socket.io';
+import { ProductRepository } from './dao/mongo-repository';
+import { Product } from './model/product.model';
 
 const POSTS_FILE = path.join(__dirname, '../posts.json');
 const DB_URL = 'mongodb://localhost:27017/';
@@ -37,8 +40,10 @@ async function start() {
 
   const db = await initDb(DB_URL, DB_NAME);
   const userRepo = new UserRepository(User, db, 'users');
+  const productRepo = new ProductRepository(Product, db, 'products');
 
   app.locals.userRepo = userRepo;
+  app.locals.productRepo = productRepo;
 
   app.set('port', PORT);
 
@@ -62,6 +67,7 @@ async function start() {
   app.use('/api/users', usersRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/rooms', roomsRouter);
+  app.use('/api/products', productsRouter);
 
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) {
@@ -82,11 +88,17 @@ async function start() {
   server.listen(app.get('port'), function (){
     io.on("connection", function (socket) {
       console.log("Client connected: " + socket.id);
-      socket.on("chat message", function (msg) {
-        console.log("Message received: " + msg);
-        console.log(msg["user"]);
-        io.emit("chat message", msg);
+      socket.on("chat message", async data => {
+        const {user, message } = data;
+        console.log("Message received from: " + user + ": " + message);
+        io.emit("chat message", data);
       });
+
+      // socket.on("chat message", function (msg) {
+      //   console.log("Message received: " + msg);
+      //   console.log(msg["user"]);
+      //   io.emit("chat message", msg);
+      // });
       socket.on("disconnect", function(socket){
         console.log("Client disconnected" + socket.id);
       })
