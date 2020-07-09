@@ -18,24 +18,27 @@ import { User } from './model/user.model';
 import usersRouter from './routes/users-router';
 import authRouter from './routes/auth-router';
 import roomsRouter from './routes/rooms-router';
+import { createServer } from 'http';
+import * as socketIo from 'socket.io';
 
 const POSTS_FILE = path.join(__dirname, '../posts.json');
 const DB_URL = 'mongodb://localhost:27017/';
 const DB_NAME = 'virtual-cafe';
 const PORT = process.env.PORT || 9000;
 
+const app = express();
+const server = createServer(app);
+const io = require('socket.io').listen(server);
+
 let connection: MongoClient;
 
 async function start() {
-  const app = express();
-  const http = require('http').Server(app);
-  const io = require('socket.io')(http, { transports: ['websocket', 'polling'] });  
+   
 
   const db = await initDb(DB_URL, DB_NAME);
   const userRepo = new UserRepository(User, db, 'users');
 
   app.locals.userRepo = userRepo;
-  app.locals.io = io;
 
   app.set('port', PORT);
 
@@ -76,9 +79,24 @@ async function start() {
 
   app.locals.postDbFile = POSTS_FILE;
 
-  app.listen(app.get('port'), function () {
-    console.log('Server started: http://localhost:' + app.get('port') + '/');
-  });
+  server.listen(app.get('port'), function (){
+    io.on("connection", function (socket) {
+      console.log("Client connected: " + socket.id);
+      socket.on("chat message", function (msg) {
+        console.log("Message received: " + msg);
+        console.log(msg["user"]);
+        io.emit("chat message", msg);
+      });
+      socket.on("disconnect", function(socket){
+        console.log("Client disconnected" + socket.id);
+      })
+    });
+  })
+
+  // app.listen(app.get('port'), function () {
+  //   console.log('Server started: http://localhost:' + app.get('port') + '/');
+    
+  // });
   app.on('close', cleanup);
 }
 
