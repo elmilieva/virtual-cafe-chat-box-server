@@ -41,14 +41,11 @@ router.post('/', async (req, res, next) => {
     try {
         await indicative.validator.validate(newUser, {
             _id: 'regex:^[0-9a-fA-F]{24}$',
-            // title: 'required|string|min:3|max:30',
-            // text: 'required|string|min:3|max:1024',
-            // // authorId: 'required|regex:^[0-9a-fA-F]{24}$',s
-            // imageUrl: 'url',
-            // categories: 'array',
-            // 'categories.*': 'string',
-            // keywords: 'array',
-            // 'keywords.*': 'string',
+            firstName: 'required|string|min:2|max:40',
+            lastName: 'required|string|min:2|max:40',
+            username: 'required|string|min:2|max:40',
+            password: 'required|string|min:8|regex:^[a-zA-Z]+$',
+            email: 'required|email',
         });
     } catch (err) {
         next(new AppError(400, err.message, err));
