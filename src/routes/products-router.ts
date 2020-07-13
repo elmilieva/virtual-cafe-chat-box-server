@@ -3,7 +3,7 @@ import { AppError } from '../model/errors';
 import { ProductRepository } from '../dao/mongo-repository';
 import * as indicative from 'indicative';
 import * as bcrypt from 'bcryptjs';
-import { User } from '../model/user.model';
+
 import { userInfo } from 'os';
 import { Product } from '../model/product.model';
 
@@ -41,7 +41,7 @@ router.post('/', async (req, res, next) => {
     try {
         await indicative.validator.validate(newProduct, {
             _id: 'regex:^[0-9a-fA-F]{24}$',
-            // title: 'required|string|min:3|max:30',
+            name: 'required|string|min:2|max:40',
             // text: 'required|string|min:3|max:1024',
             // // authorId: 'required|regex:^[0-9a-fA-F]{24}$',s
             // imageUrl: 'url',
@@ -78,10 +78,11 @@ router.put('/:id', async function (req, res, next) {
     try {
         await indicative.validator.validate(product, {
             _id: 'required|regex:^[0-9a-fA-F]{24}$',
+            name: 'required|string|min:2|max:40',
             // title: 'required|string|min:3|max:30',
             // text: 'required|string|min:3|max:1024',
             // // authorId: 'required|regex:^[0-9a-fA-F]{24}$',s
-            // imageUrl: 'url',
+            imageUrl: 'url',
             // categories: 'array',
             // 'categories.*': 'string',
             // keywords: 'array',
@@ -100,10 +101,6 @@ router.put('/:id', async function (req, res, next) {
             return;
         }
         const found = await (<ProductRepository>req.app.locals.productRepo).findById(req.params.id);
-        if (product.name && product.name.length > 0 && found.name !== product.name) {
-            throw new AppError(400, `Can not change username.`);
-        }
-        // _id is unmodifiable
         product._id = found._id;
         const updated = await (<ProductRepository>req.app.locals.productRepo).edit(product);
         res.json(updated); //200 OK with user in the body

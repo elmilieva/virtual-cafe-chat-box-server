@@ -78,10 +78,12 @@ router.put('/:id', async function (req, res, next) {
     try {
         await indicative.validator.validate(user, {
             _id: 'required|regex:^[0-9a-fA-F]{24}$',
+            firstName: 'required|string|min:2|max:40',
+            lastName: 'required|string|min:2|max:40',
             // title: 'required|string|min:3|max:30',
             // text: 'required|string|min:3|max:1024',
             // // authorId: 'required|regex:^[0-9a-fA-F]{24}$',s
-            // imageUrl: 'url',
+             imageUrl: 'url',
             // categories: 'array',
             // 'categories.*': 'string',
             // keywords: 'array',
