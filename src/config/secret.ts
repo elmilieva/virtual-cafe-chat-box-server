@@ -1,1 +1,1 @@
-export const secret='my_secret';
+export const secret = "my_secret";
