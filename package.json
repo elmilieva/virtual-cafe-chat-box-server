@@ -17,7 +17,7 @@
     "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
     "indicative": "^7.4.4",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mongodb": "^3.5.9",
     "rxjs": "^6.5.5",
     "socket.io": "^2.3.0"
